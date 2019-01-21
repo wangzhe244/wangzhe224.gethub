@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        .container {
+            display: inline-block;
+            border: 1px solid skyblue;
+            /* margin: auto; */
+            position: relative;
+        }
+
+        .col {
+            box-sizing: border-box;
+            float: left;
+            border: 1px solid black;
+
+
+        }
+
+        .row:after {
+            content: '';
+            display: block;
+            clear: both;
+        }
+
+        .snake {
+            background: pink;
+        }
+
+        .food {
+            background: red;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container"></div>
+
+
+
+
+</body>
+
+<script>
+    var container = document.getElementsByClassName('container')[0];
+    let [col_, row_, wh] = [20, 20, 30];
+    var bigArr = [];
+    var smallArr = [];
+    // 生成地图
+    function create() {
+        for (var i = 0; i < row_; i++) {
+            var row = document.createElement('div');
+            row.className = 'row';
+            container.appendChild(row);
+        }
+        // 生成小盒子
+        var row = document.getElementsByClassName('row');
+        for (var j = 0; j < row.length; j++) {
+            smallArr = [];
+            for (var i = 0; i < col_; i++) {
+                let col = document.createElement('div');
+                col.style.width = wh + 'px';
+                col.style.height = wh + 'px';
+                col.className = 'col';
+                row[j].appendChild(col);
+                smallArr.push(col);
+
+            }
+            bigArr.push(smallArr);
+
+        }
+    }
+    create();
+
+    // 存蛇的数组
+    let sarr = [];
+    for (var i = 0; i < 3; i++) {
+        let a = document.getElementsByClassName('col')[i];
+        a.className += ' snake';
+        sarr.push(a);
+    }
+
+    let [x, y] = [2, 0];
+    let fx = 'r';//🐍头的方向
+    let move;
+
+    // 判断🐍是否要改变
+    let change = 0;
+    // 键盘方向的判断
+    document.onkeydown = function (e) {
+        if (change) {
+            return;
+        }
+        var event = e || window.event;
+        if (event.keyCode == 37 && fx == 'r') {
+            return;
+        }
+        if (event.keyCode == 38 && fx == 'b') {
+            return;
+        }
+        if (event.keyCode == 39 && fx == 'l') {
+            return;
+        }
+        if (event.keyCode == 40 && fx == 't') {
+            return;
+        }
+        switch (event.keyCode) {
+            case 37:
+                fx = 'l';
+                break;
+            case 38:
+                fx = 't';
+                break;
+            case 39:
+                fx = 'r';
+                break;
+            case 40:
+                fx = 'b';
+                break;
+        }
+        change = 1;
+        setTimeout(function () {
+            change = 0;
+        }, 600);
+    }
+    // 🐍动起来的计时器
+    function snakemove() {
+        move = setInterval(function () {
+            if (fx == 'l') {
+                x--;
+            }
+            if (fx == 'r') {
+                x++;
+            }
+            if (fx == 't') {
+                y--;
+            }
+            if (fx == 'b') {
+                y++;
+            }
+            // 蛇的碰壁
+            if (x > col_ || x < 0 || y < 0 | y > row_) {
+                alert('游戏结束');
+                clearInterval(move);
+                return;
+            }
+
+            // 蛇吃自己
+            if(sarr[sarr.length -1].className=="col snake snake"){
+                alert('游戏结束')
+                setInterval(move);
+                return;
+            }
+            // 生成食物
+            if (sarr[sarr.length - 1].className == "col food snake") {
+                sarr[sarr.length - 1].className = "col snake";
+                sarr.push(sarr[sarr.length - 1]);
+                food();
+            }
+            // 🐍动起来的计时器
+            bigArr[y][x].className += ' snake';
+            sarr.push(bigArr[y][x]);
+            sarr[0].className = 'col';
+            sarr.shift();
+
+        }, 600);
+    }
+    // snakemove();
+
+    // 生成食物的函数
+    function food() {
+        var x = getradom(row_ - 1);
+        var y = getradom(col_ - 1);
+        if (bigArr[y][x].className == "col snake") {
+            food();
+        } else {
+            bigArr[y][x].className += ' food';
+        }
+    }
+    food();
+
+    // 暂停
+
+    var flag = false;
+    document.onclick = function () {
+        if (!flag) {
+            snakemove();
+            flag = true;
+        } else {
+            clearInterval(move);
+            flag = false;
+        }
+    }
+
+
+    function getradom(min, max = 0) {
+        return Math.floor(Math.random() * (max - min) + min);
+    }
+
+</script>
+
+</html>
